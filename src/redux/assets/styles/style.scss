@@ -80,3 +80,26 @@ html {
     }
   }
 }
+
+.search-container {
+  display: flex;
+  flex: 0 0 auto;
+  >.input {
+    width: 200px;
+  }
+  >.input, >.button {
+    flex: 0 0 auto;
+  }
+}
+
+.is-current-search-result-row {
+  background-color: rgba($blue, 0.15);
+  -webkit-transition: background-color .5s linear;
+  transition: background-color .5s linear;
+  &:hover {
+    background-color: rgba($blue, 0.2);
+    -webkit-transition: background-color 0s linear;
+    transition: background-color 0s linear;
+
+  }
+}

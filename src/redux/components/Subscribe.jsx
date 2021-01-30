@@ -4,9 +4,10 @@ import { connect } from 'react-redux';
 import classnames from 'classnames';
 import { Actions as KafkaActions } from 'redux-lenses-streaming';
 import { Action } from '../actions';
+import Search from './Search'
 
 
-class Subscribe extends React.Component {
+export class Subscribe extends React.Component {
   constructor(props) {
     super(props);
 
@@ -35,11 +36,22 @@ class Subscribe extends React.Component {
     this.props.clearMessages();
   }
 
-  onUnsubscribe(topic) {
+  onUnsubscribe(topics) {
     const request = {
-      topics: [topic],
+      topics
     };
     this.props.unsubscribe(request);
+  }
+
+  unsubscribeAllTopics = () => {
+    const { subscriptions } = this.props
+    subscriptions.length > 0 && this.onUnsubscribe(subscriptions)
+  }
+
+  componentDidUpdate() {
+    if (this.props.messages.length >= 15000) {
+      this.unsubscribeAllTopics()
+    }
   }
 
   render() {
@@ -50,7 +62,7 @@ class Subscribe extends React.Component {
 
     const topics = subscriptions.map(subscription =>
       (<button
-        onClick={this.onUnsubscribe.bind(this, subscription)}
+        onClick={this.onUnsubscribe.bind(this, [subscription])}
         key={subscription}
         className="button is-danger is-outlined is-small is-pulled-right"
       >
@@ -84,18 +96,21 @@ class Subscribe extends React.Component {
               disabled={!connection || !this.state.sqls}
             >
               Subscribe
-        </button>
+            </button>
             <button
               onClick={this.onClearMessages}
               className="button is-small is-danger"
               disabled={!connection}
             >
               Clear Messages
-        </button>
+            </button>
           </div>
           <div className="control">
             {topics}
           </div>
+        </div>
+        <div className="panel-block">
+          <Search />
         </div>
         <div className="panel-block">
           <div className="control">

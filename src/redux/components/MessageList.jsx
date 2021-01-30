@@ -18,9 +18,15 @@ class MessageList extends React.Component {
     };
   }
 
-  componentDidUpdate() {
-    if (Object.keys(this.state.message).length === 0) {
+  componentDidUpdate(prevProps) {
+    const { searchResultIndex } = this.props
+
+    if (Object.keys(this.state.message).length === 0 && searchResultIndex === null) {
       this.list.scrollToRow(this.props.messages.length);
+    }
+
+    if (searchResultIndex !== null && prevProps.searchResultIndex !== searchResultIndex) {
+      this.list.scrollToRow(this.props.searchResultIndex)
     }
   }
 
@@ -28,7 +34,7 @@ class MessageList extends React.Component {
     this.setState({ message: d });
   };
 
-  rowRenderer = messages => ({
+  rowRenderer = (messages, searchResultIndex) => ({
     key, // Unique key within array of rows
     index, // Index of row within collection
     isScrolling, // The List is currently being scrolled
@@ -43,11 +49,13 @@ class MessageList extends React.Component {
     Object.keys(JSON.parse(messages[index].value)).forEach(function(k) {
       arr.push({ label: k, value: JSON.parse(messages[index].value)[k] });
     });
+    const isCurrentSearchResultRow = index === searchResultIndex
+    const className = classnames('message-row columns ws-message-list is-multiline', {'is-current-search-result-row' : isCurrentSearchResultRow })
     return (
       <div
         key={key}
         style={style}
-        className="message-row columns ws-message-list is-multiline"
+        className={className}
         onClick={this.onShowRowDetails.bind(this, messages[index])}
       >
         <div className="column is-2">
@@ -74,7 +82,7 @@ class MessageList extends React.Component {
   };
 
   render() {
-    const { messages, onCommitMessage } = this.props;
+    const { messages, onCommitMessage, searchResultIndex } = this.props;
     const { onShowRowDetails } = this;
     const { message } = this.state;
 
@@ -97,7 +105,7 @@ class MessageList extends React.Component {
                   height={290}
                   rowCount={messages.length}
                   rowHeight={160}
-                  rowRenderer={this.rowRenderer(messages)}
+                  rowRenderer={this.rowRenderer(messages, searchResultIndex)}
                 />
               )}
             </AutoSizer>
@@ -123,12 +131,14 @@ MessageList.defaultProps = {};
 
 MessageList.propTypes = {
   onCommitMessage: PropTypes.func,
-  message: PropTypes.object
+  message: PropTypes.object,
+  searchResultIndex: PropTypes.number
 };
 
 const mapStateToProps = state => ({
   message: state.session.message,
-  messages: state.session.messages
+  messages: state.session.messages,
+  searchResultIndex: state.session.searchResultIndex
 });
 
 const mapDispatchToProps = {
